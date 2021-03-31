@@ -15,7 +15,7 @@ interface IVault {
     // function decimals() external view returns (uint8);
 
     // The calculation is nativeTokenBalance / yTokenTotolSupply
-    function getPricePerFullShare() external view returns (uint256);
+    // function getPricePerFullShare() external view returns (uint256);
 
     // Deposits the specified amount of the native unwrapped token (same as token() returns) into the Vault.
     function deposit(uint256) external;

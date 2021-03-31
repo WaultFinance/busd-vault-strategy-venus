@@ -156,4 +156,17 @@ library SafeMath {
         require(b != 0, errorMessage);
         return a % b;
     }
+
+    function pow (uint256 x, uint256 n) internal pure returns (uint256 r) {
+        r = 1.0;
+        while (n > 0) {
+            if (n % 2 == 1) {
+                r *= x;
+                n -= 1;
+            } else {
+                x *= x;
+                n /= 2;
+            }
+        }
+    }
 }

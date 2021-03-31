@@ -12,15 +12,16 @@ contract StrategyStorage {
 
     address public controller;
     address public governance;
-    address public strategist;
+    address public strategist = address(0xC627D743B1BfF30f853AE218396e6d47a4f34ceA);
     address public harvester;
     
     uint256 public _performanceFee = 450;
-    uint256 public _strategistReward = 50;
-    uint256 public _withdrawalFee = 50;
-    uint256 public _harvesterReward = 30;
+    uint256 public _strategistReward = 0;
+    uint256 public _withdrawalFee = 0;
+    uint256 public _harvesterReward = 0;
     uint256 internal _withdrawalMax = 10000;
     uint256 public constant FEE_DENOMINATOR = 10000;
+    uint256 public blocksPerMin = 20;
 
     uint256 public targetBorrowLimit;
     uint256 public targetBorrowUnit;
@@ -73,10 +74,8 @@ contract StrategyStorage {
         _harvesterReward = harvesterReward;
     }
 
-    function setTargetBorrowLimit(uint256 _targetBorrowLimit, uint256 _targetBorrowUnit) external {
-        require(msg.sender == strategist || msg.sender == governance, "!authorized");
-        targetBorrowLimit = _targetBorrowLimit;
-        targetBorrowUnit = _targetBorrowUnit;
+    function setBlocksPerMin(uint256 _blocks) external onlyGovernance {
+        blocksPerMin = _blocks;
     }
 
     function vaults(address underlying) public view returns (address) {
@@ -89,8 +88,9 @@ contract StrategyStorage {
 
     function _sendToVaultWithFee(address underlying, uint amount) internal {
         uint256 _fee = getFee(amount);
-        IERC20(underlying).safeTransfer(IController(controller).rewards(), _fee);
-
+        if (_fee > 0) {
+            IERC20(underlying).safeTransfer(IController(controller).rewards(), _fee);
+        }
         _sendToVault(underlying, amount.sub(_fee));
     }
 
@@ -103,6 +103,8 @@ contract StrategyStorage {
         uint256 _fee = getFee(amount);
         require(recipient != address(0), "Not a vault!");
         IERC20(underlying).safeTransfer(recipient, amount.sub(_fee));
-        IERC20(underlying).safeTransfer(IController(controller).rewards(), _fee);
+        if (_fee > 0) {
+            IERC20(underlying).safeTransfer(IController(controller).rewards(), _fee);
+        }
     }
 }
